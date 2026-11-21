@@ -60,8 +60,13 @@ button { -webkit-tap-highlight-color: transparent; }
   border-radius: 12px;
   background: var(--green);
   color: #19220f;
-  font-size: 1.65rem;
   transform: rotate(-5deg);
+}
+
+.brand-mark img {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
 }
 
 .brand strong, .brand small { display: block; }
@@ -198,16 +203,15 @@ button { -webkit-tap-highlight-color: transparent; }
 .piece {
   position: relative;
   z-index: 3;
-  font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", serif;
-  font-size: clamp(2.2rem, 7vw, 4.9rem);
-  line-height: 1;
-  transform: translateY(-2%);
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
+  transform: translateY(-1%);
   transition: transform 120ms ease;
+  filter: drop-shadow(0 2px 1px rgba(19, 25, 16, 0.2));
 }
 
-.piece:hover { transform: translateY(-4%) scale(1.04); }
-.piece-w { color: #fffdf3; text-shadow: 0 2px 1px #35402c, 0 0 1px #1c2118; }
-.piece-b { color: #20261e; text-shadow: 0 1px 0 rgba(255,255,255,0.22); }
+.piece:hover { transform: translateY(-3%) scale(1.035); }
 
 .rank-label, .file-label {
   position: absolute;
@@ -246,6 +250,12 @@ button { -webkit-tap-highlight-color: transparent; }
   background: #2b332a;
   color: var(--green);
   font-weight: 900;
+}
+
+.feedback-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .feedback-solved { background: rgba(84, 124, 56, 0.27); color: #e6f2dc; }
@@ -356,7 +366,8 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .promotion-modal p { margin: 0 0 16px; font-weight: 850; }
 .promotion-modal > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.promotion-modal > div button { border: 0; border-radius: 12px; padding: 8px; color: #fffdf3; background: #343d33; font-size: 2.5rem; cursor: pointer; }
+.promotion-modal > div button { border: 0; border-radius: 12px; padding: 8px; color: #fffdf3; background: #343d33; cursor: pointer; }
+.promotion-modal > div button img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
 .cancel-promotion { margin-top: 14px; border: 0; background: transparent; color: #aeb7a8; cursor: pointer; }
 
 @keyframes hint-pulse { 50% { opacity: .45; } }
@@ -379,7 +390,6 @@ button { -webkit-tap-highlight-color: transparent; }
   .board-heading h1 { font-size: 1.32rem; }
   .rating-pill { padding: 7px 10px; }
   .flip-button { padding: 7px 9px; }
-  .piece { font-size: clamp(2rem, 12.2vw, 4rem); }
   .feedback { font-size: .85rem; }
   .filters-card { display: block; }
   .section-title { display: flex; }

@@ -66,6 +66,8 @@ npm run build
 
 Dữ liệu puzzle: [Lichess Open Database](https://database.lichess.org/#puzzles), giấy phép CC0.
 
+Biểu tượng quân cờ sử dụng bộ [Chessnut](https://github.com/LexLuengas/chessnut-pieces) của Alexis Luengas theo giấy phép Apache 2.0. Bản quyền và giấy phép gốc nằm trong `public/pieces/chessnut`.
+
 ## GitHub Pages
 
 Mỗi lần push lên nhánh `main`, workflow `.github/workflows/deploy-pages.yml` sẽ kiểm thử, build và triển khai thư mục `dist` lên GitHub Pages.

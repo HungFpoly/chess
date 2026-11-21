@@ -13,10 +13,18 @@ const INITIAL_STATS: TrainerStats = {
   seenIds: [],
 };
 
-const PIECES: Record<Color, Record<PieceSymbol, string>> = {
-  w: { k: "♔", q: "♕", r: "♖", b: "♗", n: "♘", p: "♙" },
-  b: { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" },
+const PIECE_NAMES: Record<PieceSymbol, string> = {
+  k: "vua",
+  q: "hậu",
+  r: "xe",
+  b: "tượng",
+  n: "mã",
+  p: "tốt",
 };
+
+function pieceAsset(color: Color, piece: PieceSymbol) {
+  return `${import.meta.env.BASE_URL}pieces/chessnut/${color}${piece.toUpperCase()}.svg`;
+}
 
 const THEME_LABELS: Record<string, string> = {
   advantage: "Giành lợi thế",
@@ -159,16 +167,17 @@ function ChessBoard({
                 type="button"
               >
                 {piece && (
-                  <span
-                    className={`piece piece-${piece.color}`}
+                  <img
+                    className="piece"
+                    src={pieceAsset(piece.color, piece.type)}
+                    alt=""
+                    aria-hidden="true"
                     draggable={!disabled && piece.color === game.turn()}
                     onDragStart={(event) => {
                       event.dataTransfer.setData("text/plain", square);
                       event.dataTransfer.effectAllowed = "move";
                     }}
-                  >
-                    {PIECES[piece.color][piece.type]}
-                  </span>
+                  />
                 )}
                 {file === files[0] && <span className="rank-label">{rank}</span>}
                 {rank === ranks[ranks.length - 1] && <span className="file-label">{file}</span>}
@@ -430,7 +439,9 @@ function App() {
     <main className="app">
       <header className="topbar">
         <a className="brand" href={import.meta.env.BASE_URL} aria-label="Nước Hay — trang chủ">
-          <span className="brand-mark">♞</span>
+          <span className="brand-mark">
+            <img src={pieceAsset("b", "n")} alt="" aria-hidden="true" />
+          </span>
           <span>
             <strong>Nước Hay</strong>
             <small>Luyện cờ mỗi ngày</small>
@@ -472,7 +483,15 @@ function App() {
 
           <div className={`feedback feedback-${status}`} role="status" aria-live="polite">
             <span className="feedback-icon">
-              {status === "solved" ? "✓" : status === "error" ? "!" : isOpponentMoving ? "…" : "♟"}
+              {status === "solved" ? (
+                "✓"
+              ) : status === "error" ? (
+                "!"
+              ) : isOpponentMoving ? (
+                "…"
+              ) : (
+                <img src={pieceAsset(orientation, "p")} alt="" aria-hidden="true" />
+              )}
             </span>
             <span>{message}</span>
           </div>
@@ -581,13 +600,18 @@ function App() {
               {(["q", "r", "b", "n"] as PieceSymbol[]).map((piece) => (
                 <button
                   key={piece}
+                  aria-label={`Phong cấp thành ${PIECE_NAMES[piece]}`}
                   onClick={() => {
                     playUserMove(pendingPromotion.from, pendingPromotion.to, piece);
                     setPendingPromotion(null);
                   }}
                   type="button"
                 >
-                  {PIECES[gameRef.current.turn()][piece]}
+                  <img
+                    src={pieceAsset(gameRef.current.turn(), piece)}
+                    alt=""
+                    aria-hidden="true"
+                  />
                 </button>
               ))}
             </div>
