@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-21T00:00:00.000Z",
+  "source": "https://database.lichess.org/#puzzles",
+  "total": 4,
+  "shardSize": 500,
+  "shards": [
+    {
+      "file": "shard-00000.json",
+      "count": 4,
+      "minRating": 998,
+      "maxRating": 2671,
+      "themes": ["advantage", "attraction", "discoveredAttack", "fork", "long", "master", "mate", "mateIn2", "middlegame", "sacrifice", "short", "veryLong"]
+    }
+  ]
+}
