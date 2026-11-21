@@ -1,18 +1,46 @@
 import { createReadStream, createWriteStream } from "node:fs";
 import { mkdir, rename, rm, stat, writeFile } from "node:fs/promises";
-import { createZstdDecompress } from "node:zlib";
 import { dirname, join, resolve } from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { createInterface } from "node:readline";
 import { Chess } from "chess.js";
+import { Decompress } from "fzstd";
 import { parseCliArgs, parseCsvLine } from "./lib/csv.mjs";
+import { findZstdFrameOffset } from "./lib/zstd.mjs";
 
 const SOURCE_URL = "https://database.lichess.org/lichess_db_puzzle.csv.zst";
 const projectRoot = resolve(import.meta.dirname, "..");
 const rawDirectory = join(projectRoot, "data", "raw");
 const defaultSource = join(rawDirectory, "lichess_db_puzzle.csv.zst");
 const outputDirectory = join(projectRoot, "public", "puzzles");
+
+class ZstdStream extends Transform {
+  constructor() {
+    super();
+    this.decoder = new Decompress((chunk) => {
+      if (chunk.length) this.push(Buffer.from(chunk));
+    });
+  }
+
+  _transform(chunk, _encoding, callback) {
+    try {
+      this.decoder.push(chunk);
+      callback();
+    } catch (error) {
+      callback(error);
+    }
+  }
+
+  _flush(callback) {
+    try {
+      this.decoder.push(new Uint8Array(0), true);
+      callback();
+    } catch (error) {
+      callback(error);
+    }
+  }
+}
 
 function formatBytes(bytes) {
   const units = ["B", "KB", "MB", "GB"];
@@ -143,9 +171,18 @@ async function main() {
   await mkdir(stagingDirectory, { recursive: true });
 
   console.log("Đang giải nén, lọc và chia nhỏ kho puzzle…");
-  const decompressor = createZstdDecompress();
-  const input = createReadStream(sourcePath).pipe(decompressor);
-  const lines = createInterface({ input, crlfDelay: Infinity });
+  const frameOffset = await findZstdFrameOffset(sourcePath);
+  if (frameOffset > 0) {
+    console.log(`Đã bỏ qua ${frameOffset} byte metadata Zstandard ở đầu file.`);
+  }
+  const compressed = createReadStream(sourcePath, { start: frameOffset });
+  const decompressor = new ZstdStream();
+  let decompressionError = null;
+  decompressor.on("error", (error) => {
+    decompressionError = error;
+  });
+  compressed.pipe(decompressor);
+  const lines = createInterface({ input: decompressor, crlfDelay: Infinity });
   const shardMetadata = [];
   let columns = null;
   let accepted = 0;
@@ -171,6 +208,16 @@ async function main() {
     }
     if (accepted % 10_000 === 0) console.log(`  Đã chọn ${accepted.toLocaleString("vi-VN")} bài…`);
     if (accepted >= options.limit) break;
+  }
+
+  compressed.destroy();
+  decompressor.destroy();
+  if (decompressionError) {
+    await rm(stagingDirectory, { recursive: true, force: true });
+    throw new Error(
+      `Không giải nén được file Zstandard (${decompressionError.code ?? decompressionError.message}). ` +
+        "File có thể tải chưa đủ; hãy chạy lại với --refresh.",
+    );
   }
 
   if (shard.length) await writeShard(stagingDirectory, shard, shardIndex, shardMetadata);

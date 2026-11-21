@@ -190,6 +190,7 @@ function App() {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [fen, setFen] = useState(gameRef.current.fen());
   const [orientation, setOrientation] = useState<Color>("w");
+  const [boardFlipped, setBoardFlipped] = useState(false);
   const [moveIndex, setMoveIndex] = useState(1);
   const [status, setStatus] = useState<TrainerStatus>("loading");
   const [message, setMessage] = useState("Đang mở kho bài tập…");
@@ -214,6 +215,7 @@ function App() {
       setPuzzle(next);
       setFen(game.fen());
       setOrientation(game.turn());
+      setBoardFlipped(false);
       setMoveIndex(1);
       setStatus("idle");
       setMessage(`${game.turn() === "w" ? "Trắng" : "Đen"} đi — tìm nước tốt nhất`);
@@ -372,6 +374,7 @@ function App() {
       setLastMove([from, to]);
       setHintSquare(null);
       const replyIndex = moveIndex + 1;
+      setMoveIndex(replyIndex);
       if (alternateMate || replyIndex >= puzzle.moves.length) {
         finishPuzzle();
         return;
@@ -415,13 +418,18 @@ function App() {
     playUserMove(from, to);
   }
 
-  const progress = puzzle ? Math.min(100, Math.round((moveIndex / puzzle.moves.length) * 100)) : 0;
+  const progress = puzzle
+    ? status === "solved"
+      ? 100
+      : Math.min(100, Math.round((moveIndex / puzzle.moves.length) * 100))
+    : 0;
   const sideLabel = orientation === "w" ? "Trắng" : "Đen";
+  const boardTitle = status === "solved" ? "Đã hoàn thành" : `Lượt của ${sideLabel}`;
 
   return (
     <main className="app">
       <header className="topbar">
-        <a className="brand" href="/" aria-label="Nước Hay — trang chủ">
+        <a className="brand" href={import.meta.env.BASE_URL} aria-label="Nước Hay — trang chủ">
           <span className="brand-mark">♞</span>
           <span>
             <strong>Nước Hay</strong>
@@ -439,14 +447,23 @@ function App() {
           <div className="board-heading">
             <div>
               <span className="eyebrow">Bài #{puzzle?.id ?? "—"}</span>
-              <h1>{sideLabel} đi trước</h1>
+              <h1>{boardTitle}</h1>
             </div>
-            <span className="rating-pill">{puzzle?.rating ?? "—"} Elo</span>
+            <div className="board-meta">
+              <button
+                className="flip-button"
+                onClick={() => setBoardFlipped((current) => !current)}
+                type="button"
+              >
+                Xoay bàn
+              </button>
+              <span className="rating-pill">{puzzle?.rating ?? "—"} Elo</span>
+            </div>
           </div>
 
           <ChessBoard
             fen={fen}
-            orientation={orientation}
+            orientation={boardFlipped ? (orientation === "w" ? "b" : "w") : orientation}
             disabled={status !== "solving" || isOpponentMoving}
             hintSquare={hintSquare}
             lastMove={lastMove}

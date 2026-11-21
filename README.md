@@ -11,7 +11,7 @@ npm run dev
 
 ## Nhập 100.000 puzzle chất lượng cao
 
-Yêu cầu Node.js 22.15 trở lên vì script dùng bộ giải nén Zstandard dạng streaming có sẵn trong Node.
+Yêu cầu Node.js 22.15 trở lên. Script dùng bộ giải nén Zstandard dạng streaming để xử lý file lớn mà không nạp toàn bộ vào RAM.
 
 ```bash
 npm run import:puzzles -- --limit=100000
@@ -31,6 +31,12 @@ Nhập toàn bộ kho:
 npm run import:puzzles -- --all
 ```
 
+Nếu muốn tải lại file nguồn vì lần tải trước bị gián đoạn:
+
+```bash
+npm run import:puzzles -- --limit=100000 --refresh
+```
+
 Điều chỉnh bộ lọc:
 
 ```bash
@@ -43,6 +49,14 @@ Nếu đã tải file `.zst` thủ công, có thể bỏ qua bước tải:
 npm run import:puzzles -- --source="D:\data\lichess_db_puzzle.csv.zst"
 ```
 
+Nếu dừng import bằng `Ctrl+C`, có thể kích hoạt một phần dữ liệu đã ghi trong staging:
+
+```bash
+npm run recover:puzzles -- --from=public/puzzles.staging-12345 --limit=340000
+```
+
+Lệnh khôi phục giữ kho cũ và các shard dư trong `data/backups` thay vì xóa vĩnh viễn.
+
 ## Kiểm tra và build
 
 ```bash
@@ -51,3 +65,7 @@ npm run build
 ```
 
 Dữ liệu puzzle: [Lichess Open Database](https://database.lichess.org/#puzzles), giấy phép CC0.
+
+## GitHub Pages
+
+Mỗi lần push lên nhánh `main`, workflow `.github/workflows/deploy-pages.yml` sẽ kiểm thử, build và triển khai thư mục `dist` lên GitHub Pages.
